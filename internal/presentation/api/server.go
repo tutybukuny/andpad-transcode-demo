@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/compress"
 	"github.com/gofiber/fiber/v3/middleware/cors"
@@ -12,6 +13,8 @@ import (
 	"transcode-demo/config"
 	"transcode-demo/internal/middleware"
 	"transcode-demo/internal/presentation/api/healthcheck"
+	"transcode-demo/internal/presentation/api/transcoderequest"
+	"transcode-demo/internal/services/transcoderequestsvc"
 	"transcode-demo/pkg/json"
 )
 
@@ -30,6 +33,7 @@ func NewServer(cfg *config.Config, l *z.Logger, db *gorm.DB) *Server {
 			DisablePreParseMultipartForm: true,
 			JSONDecoder:                  json.Unmarshal,
 			JSONEncoder:                  json.Marshal,
+			StructValidator:              &StructValidator{validate: validator.New()},
 		}),
 		cfg: cfg,
 		db:  db,
@@ -61,6 +65,11 @@ func (s *Server) middleware(l *z.Logger) {
 
 func (s *Server) initHandlers(l *z.Logger) {
 	// health check
-	health := healthcheck.NewHandler()
-	s.r.Get("/health", health.HealthCheck)
+	healthHandler := healthcheck.NewHandler()
+	s.r.Get("/health", healthHandler.HealthCheck)
+
+	// transcode request
+	transReqHandler := transcoderequest.NewHandler(l, transcoderequestsvc.NewService(s.cfg, s.db))
+	transReqGroup := s.r.Group("/transcode-request")
+	transReqGroup.Post("", middleware.GormTransaction(l, s.db), transReqHandler.CreateTranscodeRequest)
 }

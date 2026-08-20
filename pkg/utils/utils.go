@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"math/rand"
 	"strings"
 	"unsafe"
 )
@@ -19,4 +20,18 @@ func ChoiceCondition[T any](cond bool, t T, f T) T {
 		return t
 	}
 	return f
+}
+
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func RandString(length ...int) string {
+	l := 8
+	if len(length) > 0 {
+		l = length[0]
+	}
+	str := make([]rune, l)
+	for i := range l {
+		str[i] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(str)
 }
