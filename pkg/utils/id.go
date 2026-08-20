@@ -5,7 +5,7 @@ import "github.com/bwmarrin/snowflake"
 var generator *snowflake.Node
 
 func init() {
-	snowflake.Epoch = 1772755200000 // 2026-03-06
+	snowflake.Epoch = 1787184000000 // 2026-08-20
 	generator, _ = snowflake.NewNode(1)
 }
 

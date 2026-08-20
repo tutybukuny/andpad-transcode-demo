@@ -1,18 +1,36 @@
 package utils
 
 import (
-	"fmt"
+	"context"
+	"os/signal"
 	"syscall"
+	"time"
 
-	"golang.org/x/crypto/ssh/terminal"
+	z "go.uber.org/zap"
 )
 
-func PasswordPrompt() (string, error) {
-	fmt.Print("Enter password: ")
-	bytePassword, err := terminal.ReadPassword(syscall.Stdin)
-	if err != nil {
-		return "", fmt.Errorf("ReadPassword: %w", err)
-	}
+func WaitShutDown(ctx context.Context, l *z.Logger, shutdownFunc func() error) {
+	osCtx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		defer stop()
+		select {
+		case <-osCtx.Done():
+			l.Info("Shutting down server")
+		}
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		done := make(chan error)
+		go func() {
+			done <- shutdownFunc()
+		}()
 
-	return string(bytePassword), nil
+		select {
+		case sErr := <-done:
+			if sErr != nil {
+				l.Error("Trouble when shutting down", z.Error(sErr))
+			}
+		case <-shutdownCtx.Done():
+			l.Info("Shutdown timed out")
+		}
+	}()
 }
