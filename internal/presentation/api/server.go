@@ -78,6 +78,7 @@ func (s *Server) initHandlers(l *z.Logger) {
 	transReqHandler := transcoderequest.NewHandler(l, transcoderequestsvc.NewService(s.cfg, s.db))
 	transReqGroup := s.r.Group("/transcode-request")
 	transReqGroup.Post("", middleware.GormTransaction(l, s.db), transReqHandler.CreateTranscodeRequest)
+	transReqGroup.Get("/:id", transReqHandler.GetTranscodeRequest)
 }
 
 // test utils

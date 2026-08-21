@@ -4,6 +4,13 @@ import (
 	"errors"
 )
 
+func ErrNotFound(err error, msg ...string) *CError {
+	if len(msg) == 0 {
+		msg = []string{err.Error()}
+	}
+	return newError(NotFound, msg[0], err)
+}
+
 func ErrUnauthenticated(err error, msg ...string) *CError {
 	if len(msg) == 0 {
 		msg = []string{err.Error()}

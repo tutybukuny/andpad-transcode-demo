@@ -34,5 +34,24 @@ func (h *Handler) CreateTranscodeRequest(c fiber.Ctx) error {
 		return err
 	}
 
-	return response.NewResponse[CreateTranscodeRequestResp]().WithData(CreateTranscodeRequestResp{RequestID: requestID}).JSON(c)
+	return response.NewResponse[CreateTranscodeRequestResp]().
+		WithData(CreateTranscodeRequestResp{RequestID: requestID}).
+		JSON(c)
+}
+
+// GetTranscodeRequest GET /transcode-request/:id
+func (h *Handler) GetTranscodeRequest(c fiber.Ctx) error {
+	req := new(GetTranscodeRequestReq)
+	if err := c.Bind().URI(req); err != nil {
+		return cerrors.ErrInvalidArgument(err)
+	}
+
+	transReq, err := h.transReqSvc.GetTranscodeRequest(c, req.ID)
+	if err != nil {
+		return err
+	}
+
+	return response.NewResponse[GetTranscodeRequestResp]().
+		WithData(GetTranscodeRequestResp{TranscodeRequest: transReq}).
+		JSON(c)
 }
