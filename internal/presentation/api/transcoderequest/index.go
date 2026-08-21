@@ -55,3 +55,17 @@ func (h *Handler) GetTranscodeRequest(c fiber.Ctx) error {
 		WithData(GetTranscodeRequestResp{TranscodeRequest: transReq}).
 		JSON(c)
 }
+
+// CancelTranscodeRequest POST /transcode-request/:id/cancel
+func (h *Handler) CancelTranscodeRequest(c fiber.Ctx) error {
+	req := new(CancelTranscodeRequestReq)
+	if err := c.Bind().URI(req); err != nil {
+		return cerrors.ErrInvalidArgument(err)
+	}
+
+	err := h.transReqSvc.CancelTranscodeRequest(c, req.ID)
+	if err != nil {
+		return err
+	}
+	return response.NewResponse[struct{}]().JSON(c)
+}

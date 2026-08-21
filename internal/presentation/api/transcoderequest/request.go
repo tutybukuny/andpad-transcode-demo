@@ -7,3 +7,7 @@ type CreateTranscodeRequestReq struct {
 type GetTranscodeRequestReq struct {
 	ID int64 `uri:"id" validate:"required,gt=0"`
 }
+
+type CancelTranscodeRequestReq struct {
+	ID int64 `uri:"id" validate:"required,gt=0"`
+}
