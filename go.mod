@@ -5,6 +5,7 @@ go 1.26.4
 require (
 	github.com/bwmarrin/snowflake v0.3.0
 	github.com/go-playground/validator/v10 v10.30.3
+	github.com/go-resty/resty/v2 v2.17.2
 	github.com/gofiber/fiber/v3 v3.5.0
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/json-iterator/go v1.1.12

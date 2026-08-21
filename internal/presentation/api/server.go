@@ -1,12 +1,17 @@
 package api
 
 import (
+	"math/rand"
+	"testing"
+	"time"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/compress"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/pprof"
 	"github.com/gofiber/fiber/v3/middleware/requestid"
+	"github.com/stretchr/testify/require"
 	z "go.uber.org/zap"
 	"gorm.io/gorm"
 
@@ -16,6 +21,7 @@ import (
 	"transcode-demo/internal/presentation/api/transcoderequest"
 	"transcode-demo/internal/services/transcoderequestsvc"
 	"transcode-demo/pkg/json"
+	"transcode-demo/pkg/logger"
 )
 
 type Server struct {
@@ -72,4 +78,24 @@ func (s *Server) initHandlers(l *z.Logger) {
 	transReqHandler := transcoderequest.NewHandler(l, transcoderequestsvc.NewService(s.cfg, s.db))
 	transReqGroup := s.r.Group("/transcode-request")
 	transReqGroup.Post("", middleware.GormTransaction(l, s.db), transReqHandler.CreateTranscodeRequest)
+}
+
+// test utils
+
+// NewTestServer creates a test server of Server
+func NewTestServer(t testing.TB) string {
+	cfg := config.MustNewDevConfig(t)
+	l := logger.New(cfg.Log)
+	db := config.MustNewGorm(t)
+	s := NewServer(cfg, l, db)
+	cfg.HttpConfig.Port = rand.Intn(10000) + 9000
+	go func() {
+		err := s.Listen(cfg.HttpConfig.GetAddr())
+		require.NoError(t, err)
+	}()
+	t.Cleanup(func() {
+		s.Shutdown()
+	})
+	time.Sleep(50 * time.Millisecond)
+	return "http://" + cfg.HttpConfig.GetAddr()
 }
