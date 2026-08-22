@@ -1,6 +1,9 @@
-package transcoderequestsvc
+package transcodesvc
 
 import (
+	"fmt"
+
+	"github.com/panjf2000/ants/v2"
 	z "go.uber.org/zap"
 	"gorm.io/gorm"
 
@@ -14,13 +17,19 @@ type Service struct {
 	cfg          *config.Config
 	db           *gorm.DB
 	transReqRepo repositories.ITranscodeRequestRepo
+	threadPool   *ants.Pool
 }
 
-func NewService(cfg *config.Config, db *gorm.DB, l *z.Logger) *Service {
+func NewService(cfg *config.Config, l *z.Logger, db *gorm.DB) (*Service, error) {
+	threadPool, err := ants.NewPool(10)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create thread pool: %w", err)
+	}
 	return &Service{
-		l:            l,
 		cfg:          cfg,
+		l:            l,
 		db:           db,
 		transReqRepo: psqlrepo.NewTranscodeRequestRepo(db),
-	}
+		threadPool:   threadPool,
+	}, nil
 }

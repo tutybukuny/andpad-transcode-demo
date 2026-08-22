@@ -12,3 +12,7 @@ type ITranscodeRequestService interface {
 	CancelTranscodeRequest(ctx context.Context, id int64) error
 	CheckTranscodeRequest(ctx context.Context) error
 }
+
+type ITranscodeService interface {
+	Transcode(ctx context.Context, reqID int64) error
+}

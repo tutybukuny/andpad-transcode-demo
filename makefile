@@ -3,7 +3,7 @@ tdapp:
 	docker build . -f ./docker/tdapp_local.DockerFile -t tdapp:local
 local-dev-up: tdapp
 	cd docker && \
-	docker compose up -d db db_migration
+	docker compose up -d db db_migration localstack
 local-up: tdapp
 	cd docker && \
 	docker compose up -d
