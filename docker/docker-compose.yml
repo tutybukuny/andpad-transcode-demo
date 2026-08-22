@@ -14,6 +14,21 @@ services:
       timeout: 5s
       retries: 5
 
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "127.0.0.1:4566:4566"
+      - "127.0.0.1:4510-4559:4510-4559"
+    environment:
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - PERSISTENCE=0
+      - LOCALSTACK_AUTH_TOKEN=ls-Nipu2233-RoMe-DiRU-DutO-LuqOzAXe106a
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./init_s3.sh:/etc/localstack/init/ready.d/init_s3.sh"
+
   db_migration:
     image: tdapp:local
     container_name: db_migration

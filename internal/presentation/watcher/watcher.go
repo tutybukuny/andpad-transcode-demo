@@ -15,7 +15,6 @@ import (
 type Watcher struct {
 	l           *z.Logger
 	cfg         *config.Config
-	db          *gorm.DB
 	transReqSvc services.ITranscodeRequestService
 }
 
@@ -23,7 +22,6 @@ func NewWatcher(cfg *config.Config, l *z.Logger, db *gorm.DB) *Watcher {
 	return &Watcher{
 		cfg:         cfg,
 		l:           l,
-		db:          db,
 		transReqSvc: transcoderequestsvc.NewService(cfg, db, l),
 	}
 }

@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
 
+	"transcode-demo/pkg/aws"
 	"transcode-demo/pkg/db"
 	"transcode-demo/pkg/logger"
 	"transcode-demo/pkg/utils"
@@ -36,12 +37,17 @@ func (c *HttpServerConfig) GetAddr() string {
 type Config struct {
 	Log        logger.LogConfig `mapstructure:"log"`
 	HttpConfig HttpServerConfig `mapstructure:"http"`
-	DB         db.DBConfig      `mapstructure:"db"`
+
+	DB  db.DBConfig `mapstructure:"db"`
+	AWS aws.Config  `mapstructure:"aws"`
 
 	// watcher configurations
 	WatcherSleepInterval   time.Duration `mapstructure:"watcher_sleep_interval"`
 	StalledRequestDuration time.Duration `mapstructure:"stalled_request_duration"`
 	RetriedTimesThreshold  int           `mapstructure:"retried_times_threshold"`
+
+	// transcode configurations
+	TranscodeOutputPrefix string `mapstructure:"transcode_output_prefix"`
 }
 
 // New creates a new config for the application.
@@ -61,6 +67,8 @@ func (c *Config) SetDefault() {
 	viper.SetDefault("watcher_sleep_interval", 10*time.Second)
 	viper.SetDefault("stalled_request_duration", 10*time.Second)
 	viper.SetDefault("retried_times_threshold", 3)
+
+	viper.SetDefault("transcode_output_prefix", "s3://local-bucket/transcode-output/")
 }
 
 func (c *Config) GetDB() (*sql.DB, error) {
