@@ -27,17 +27,17 @@ func (s *Service) CheckTranscodeRequest(ctx context.Context) error {
 		}
 
 		for _, req := range reqs {
-			nextStatus := constant.TranscodeRequestStatusTodo
-			if req.RetriedTimes > s.cfg.RetriedTimesThreshold {
+			req.Status = constant.TranscodeRequestStatusTodo
+			if req.RetriedTimes >= s.cfg.RetriedTimesThreshold {
 				// over threshold, mark as failed
 				moveToFailedCount++
-				nextStatus = constant.TranscodeRequestStatusFailed
+				req.Status = constant.TranscodeRequestStatusFailed
+				req.FailedReason = "exceed retry times threshold"
 			} else {
 				// increase retry times
 				moveToFailedCount++
 				req.RetriedTimes++
 			}
-			req.Status = nextStatus
 			err = s.transReqRepo.Update(ctx, &req)
 			if err != nil {
 				s.l.Debug(

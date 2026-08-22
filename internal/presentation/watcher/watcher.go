@@ -41,6 +41,7 @@ func (w *Watcher) Run(ctx context.Context) error {
 			err := w.transReqSvc.CheckTranscodeRequest(ctx)
 			if err != nil {
 				w.l.Error("failed to check transcode request", z.Error(err))
+				return err
 			}
 			ticker.Reset(w.cfg.WatcherSleepInterval)
 		}
