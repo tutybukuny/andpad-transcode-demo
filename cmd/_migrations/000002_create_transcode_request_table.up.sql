@@ -9,11 +9,14 @@ CREATE TABLE IF NOT EXISTS tdapp.transcode_request
     failed_reason         TEXT                  NOT NULL DEFAULT '',
     started_transcode_at  TIMESTAMPTZ,
     finished_transcode_at TIMESTAMPTZ,
+    last_processing_at    TIMESTAMPTZ,
+    retried_times         INT                   NOT NULL DEFAULT 0,
     created_at            TIMESTAMPTZ                    DEFAULT NOW() NOT NULL,
     updated_at            TIMESTAMPTZ                    DEFAULT NOW() NOT NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_transcode_request_status ON tdapp.transcode_request (status);
 CREATE INDEX IF NOT EXISTS idx_transcode_request_created_at ON tdapp.transcode_request (updated_at);
+CREATE INDEX IF NOT EXISTS idx_transcode_request_last_processing_retried ON tdapp.transcode_request (last_processing_at, retried_times);
 
 COMMIT;

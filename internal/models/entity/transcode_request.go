@@ -14,6 +14,8 @@ type TranscodeRequest struct {
 	FailedReason        string                          `json:"failed_reason"`
 	StartedTranscodeAt  *time.Time                      `json:"started_transcode_at"`
 	FinishedTranscodeAt *time.Time                      `json:"finished_transcode_at"`
+	LastProcessingAt    *time.Time                      `json:"last_processing_at"`
+	RetriedTimes        int                             `json:"retried_times"`
 	CreatedAt           time.Time                       `json:"created_at"`
 	UpdatedAt           time.Time                       `json:"updated_at"`
 }

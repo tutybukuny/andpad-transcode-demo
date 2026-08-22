@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
@@ -36,6 +37,11 @@ type Config struct {
 	Log        logger.LogConfig `mapstructure:"log"`
 	HttpConfig HttpServerConfig `mapstructure:"http"`
 	DB         db.DBConfig      `mapstructure:"db"`
+
+	// watcher configurations
+	WatcherSleepInterval   time.Duration `mapstructure:"watcher_sleep_interval"`
+	StalledRequestDuration time.Duration `mapstructure:"stalled_request_duration"`
+	RetriedTimesThreshold  int           `mapstructure:"retried_times_threshold"`
 }
 
 // New creates a new config for the application.
@@ -51,6 +57,10 @@ func (c *Config) SetDefault() {
 	c.Log.SetDefault("log")
 	c.HttpConfig.SetDefault("http")
 	c.DB.SetDefault("db")
+
+	viper.SetDefault("watcher_sleep_interval", 10*time.Second)
+	viper.SetDefault("stalled_request_duration", 10*time.Second)
+	viper.SetDefault("retried_times_threshold", 3)
 }
 
 func (c *Config) GetDB() (*sql.DB, error) {

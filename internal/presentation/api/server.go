@@ -1,3 +1,10 @@
+// Package api represents the api
+// For the standard, it should be like:
+// - interface
+// - fiber/
+// - gin/
+// to not depend on the framework
+// but based on the real work, we could reduce the number of layers in this (but still can extend later)
 package api
 
 import (
@@ -75,7 +82,7 @@ func (s *Server) initHandlers(l *z.Logger) {
 	s.r.Get("/health", healthHandler.HealthCheck)
 
 	// transcode request
-	transReqHandler := transcoderequest.NewHandler(l, transcoderequestsvc.NewService(s.cfg, s.db))
+	transReqHandler := transcoderequest.NewHandler(l, transcoderequestsvc.NewService(s.cfg, s.db, l))
 	transReqGroup := s.r.Group("/transcode-request")
 	transReqGroup.Post("", middleware.GormTransaction(l, s.db), transReqHandler.CreateTranscodeRequest)
 	transReqGroup.Get("/:id", transReqHandler.GetTranscodeRequest)

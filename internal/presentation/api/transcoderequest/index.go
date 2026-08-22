@@ -1,18 +1,18 @@
 package transcoderequest
 
 import (
-	"transcode-demo/internal/models/response"
-
 	"github.com/gofiber/fiber/v3"
 	z "go.uber.org/zap"
 
+	"transcode-demo/internal/models/response"
+	"transcode-demo/internal/services"
 	"transcode-demo/internal/services/transcoderequestsvc"
 	"transcode-demo/pkg/cerrors"
 )
 
 type Handler struct {
 	l           *z.Logger
-	transReqSvc *transcoderequestsvc.Service
+	transReqSvc services.ITranscodeRequestService
 }
 
 func NewHandler(l *z.Logger, transReqSvc *transcoderequestsvc.Service) *Handler {

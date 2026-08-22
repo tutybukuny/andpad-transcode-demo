@@ -15,7 +15,7 @@ func WaitShutDown(ctx context.Context, l *z.Logger, shutdownFunc func() error) {
 		defer stop()
 		select {
 		case <-osCtx.Done():
-			l.Info("Shutting down server")
+			l.Info("Shutting down")
 		}
 		shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()

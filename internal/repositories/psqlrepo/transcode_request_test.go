@@ -74,3 +74,42 @@ func TestNewTranscodeRequestRepo(t *testing.T) {
 		require.NoError(t, err)
 	}
 }
+
+func TestTranscodeRequestRepo_GetStalledProcessingRequests(t *testing.T) {
+	ctx := context.Background()
+	db := config.MustNewGorm(t)
+	repo := NewTranscodeRequestRepo(db)
+
+	// fixture 5 records
+	for i := range 5 {
+		req := &entity.TranscodeRequest{
+			VideoURL:           utils.RandString(),
+			Status:             constant.TranscodeRequestStatusProcessing,
+			StartedTranscodeAt: new(time.Now().Add(-time.Minute)),
+			LastProcessingAt:   new(time.Now().Add(-time.Duration(i) * time.Second)),
+		}
+		err := repo.Insert(ctx, req)
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			err = repo.Delete(ctx, req.ID)
+			require.NoError(t, err)
+		})
+	}
+
+	reqs, err := repo.GetStalledProcessingRequests(ctx, 10*time.Second, 0)
+	require.NoError(t, err)
+	require.Empty(t, reqs)
+
+	reqs, err = repo.GetStalledProcessingRequests(ctx, 2*time.Second, 2)
+	require.NoError(t, err)
+	require.Len(t, reqs, 2)
+
+	reqs, err = repo.GetStalledProcessingRequests(ctx, 2*time.Second, 0)
+	require.NoError(t, err)
+	require.Len(t, reqs, 3)
+
+	for _, req := range reqs {
+		require.Equal(t, constant.TranscodeRequestStatusProcessing, req.Status)
+		require.True(t, req.LastProcessingAt.Before(time.Now().Add(-2*time.Second)))
+	}
+}

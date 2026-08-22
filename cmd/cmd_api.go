@@ -1,15 +1,11 @@
 package main
 
 import (
-	"context"
-	"fmt"
-
 	"github.com/spf13/cobra"
 	z "go.uber.org/zap"
 
 	"transcode-demo/config"
 	"transcode-demo/internal/presentation/api"
-	"transcode-demo/pkg/db"
 	"transcode-demo/pkg/utils"
 )
 
@@ -20,19 +16,15 @@ func newAPICmd(cfg *config.Config, l *z.Logger) *cobra.Command {
 		Long:  "API application",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			dbConn, err := cfg.GetDB()
+			gormDB, closeConn, err := getDB(cfg, l)
 			if err != nil {
 				l.Error("Failed to connect to database", z.Error(err))
-				return fmt.Errorf("failed to connect to database: %w", err)
+				return err
 			}
-			defer dbConn.Close()
-			gormDB, err := db.NewGormDB(dbConn)
-			if err != nil {
-				return fmt.Errorf("failed to create db: %w", err)
-			}
+			defer closeConn()
 
 			s := api.NewServer(cfg, l, gormDB)
-			utils.WaitShutDown(context.Background(), l, func() error {
+			utils.WaitShutDown(cmd.Context(), l, func() error {
 				return s.Shutdown()
 			})
 
