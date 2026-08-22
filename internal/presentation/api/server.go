@@ -86,6 +86,7 @@ func (s *Server) initHandlers(l *z.Logger) {
 	transReqGroup := s.r.Group("/transcode-request")
 	transReqGroup.Post("", middleware.GormTransaction(l, s.db), transReqHandler.CreateTranscodeRequest)
 	transReqGroup.Get("/:id", transReqHandler.GetTranscodeRequest)
+	transReqGroup.Post("/:id/cancel", transReqHandler.CancelTranscodeRequest)
 }
 
 // test utils

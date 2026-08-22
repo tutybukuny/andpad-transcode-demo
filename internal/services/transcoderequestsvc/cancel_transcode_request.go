@@ -18,6 +18,13 @@ func (s *Service) CancelTranscodeRequest(ctx context.Context, id int64) error {
 		return cerrors.ErrInternal(err)
 	}
 
+	switch transReq.Status {
+	case constant.TranscodeRequestStatusCancelled:
+		return nil
+	case constant.TranscodeRequestStatusCompleted, constant.TranscodeRequestStatusFailed:
+		return cerrors.Error(400, "transcode request already completed")
+	}
+
 	transReq.Status = constant.TranscodeRequestStatusCancelled
 	err = s.transReqRepo.Update(ctx, transReq)
 	if err != nil {
