@@ -29,7 +29,7 @@ func NewTranscoder(l *z.Logger, cfg *config.Config, req *entity.TranscodeRequest
 }
 
 func (t *Transcoder) Transcode(ctx context.Context) (string, error) {
-	downloader, err := NewDownloader(ctx, t.l, t.cfg, t.req.VideoURL)
+	downloader, err := NewDownloader(t.l, t.cfg, t.req.VideoURL)
 	if err != nil {
 		return "", fmt.Errorf("NewDownloader: %w", err)
 	}

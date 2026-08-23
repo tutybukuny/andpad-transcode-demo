@@ -63,6 +63,7 @@ func (c *Config) SetDefault() {
 	c.Log.SetDefault("log")
 	c.HttpConfig.SetDefault("http")
 	c.DB.SetDefault("db")
+	c.AWS.SetDefault("aws")
 
 	viper.SetDefault("watcher_sleep_interval", 10*time.Second)
 	viper.SetDefault("stalled_request_duration", 10*time.Second)

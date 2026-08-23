@@ -45,12 +45,12 @@ func (c *Config) GetClient(ctx context.Context) (*s3.Client, error) {
 			config.WithRegion(c.Region),
 			config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(c.AccessKeyID, c.SecretAccessKey, c.SessionToken)),
 		)
-		cfg.BaseEndpoint = &c.Endpoint
 		if err != nil {
 			panic(err)
 		}
 		client = s3.NewFromConfig(cfg, func(o *s3.Options) {
 			o.UsePathStyle = c.S3ForcePathStyle
+			o.BaseEndpoint = &c.Endpoint
 		})
 	})
 	if err != nil {
