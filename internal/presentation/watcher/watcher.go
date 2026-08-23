@@ -10,6 +10,7 @@ import (
 	"transcode-demo/config"
 	"transcode-demo/internal/services"
 	"transcode-demo/internal/services/transcoderequestsvc"
+	"transcode-demo/pkg/utils"
 )
 
 type Watcher struct {
@@ -36,9 +37,15 @@ func (w *Watcher) Run(ctx context.Context) error {
 			w.l.Info("watcher stopped")
 			return nil
 		case <-ticker.C:
-			err := w.transReqSvc.CheckTranscodeRequest(ctx)
+			err := utils.Recover(w.l, func() error {
+				err := w.transReqSvc.CheckTranscodeRequest(ctx)
+				if err != nil {
+					w.l.Error("failed to check transcode request", z.Error(err))
+					return err
+				}
+				return nil
+			})
 			if err != nil {
-				w.l.Error("failed to check transcode request", z.Error(err))
 				return err
 			}
 			ticker.Reset(w.cfg.WatcherSleepInterval)

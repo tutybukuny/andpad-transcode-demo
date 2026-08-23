@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -51,15 +52,16 @@ func TestS3Downloader_Download(t *testing.T) {
 	} {
 		t.Run(te.name, func(t *testing.T) {
 			downloader := newS3Downloader(l, cfg.AWS)
-			outputPath, clean, err := downloader.Download(ctx, te.filePath)
+			outputFolder, outputFilePath, clean, err := downloader.Download(ctx, te.filePath)
 			if te.expectedErrStr != "" {
 				require.Error(t, err)
 				require.Contains(t, err.Error(), te.expectedErrStr)
 				return
 			}
 			require.NoError(t, err)
-			require.NotEmpty(t, outputPath)
-			file, err := os.Open(outputPath)
+			require.NotEmpty(t, outputFilePath)
+			require.True(t, strings.HasPrefix(outputFilePath, outputFolder))
+			file, err := os.Open(outputFilePath)
 			require.NoError(t, err)
 			defer file.Close()
 			buf := bytes.NewBuffer(nil)
@@ -68,7 +70,7 @@ func TestS3Downloader_Download(t *testing.T) {
 			require.Equal(t, data, string(buf.Bytes()))
 			require.NoError(t, file.Close())
 			clean()
-			require.NoFileExists(t, outputPath)
+			require.NoFileExists(t, outputFilePath)
 		})
 	}
 }

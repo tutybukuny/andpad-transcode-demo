@@ -1,9 +1,19 @@
 package utils
 
 import (
+	"fmt"
 	"math/rand"
+	"runtime"
 	"strings"
 	"unsafe"
+
+	z "go.uber.org/zap"
+)
+
+const (
+	TestBucket    = "local-bucket"
+	TestBucketURL = "s3://local-bucket"
+	TestMp4File   = "s3://local-bucket/test-data/input.mp4"
 )
 
 // JoinConfigKeys joins a list of configuration keys into a single string with dots as separators.
@@ -34,4 +44,21 @@ func RandString(length ...int) string {
 		str[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(str)
+}
+
+func Recover(l *z.Logger, f func() error) (err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			rErr, ok := r.(error)
+			if !ok {
+				rErr = fmt.Errorf("%v", r)
+			}
+			stack := make([]byte, 4<<10)
+			length := runtime.Stack(stack, true)
+			l.Error("panic recovered", z.Error(rErr), z.ByteString("stack", stack[:length]))
+			err = rErr
+		}
+	}()
+	err = f()
+	return
 }

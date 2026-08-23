@@ -16,3 +16,4 @@ cat << 'EOF' > /tmp/policy.json
 }
 EOF
 awslocal s3api put-bucket-policy --bucket local-bucket --policy file:///tmp/policy.json
+awslocal s3 cp /tmp/input.mp4 s3://local-bucket/test-data/input.mp4

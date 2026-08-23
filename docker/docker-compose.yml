@@ -28,6 +28,7 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "./init_s3.sh:/etc/localstack/init/ready.d/init_s3.sh"
+      - "../data/input.mp4:/tmp/input.mp4"
 
   db_migration:
     image: tdapp:local

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS tdapp.transcode_request
     id                    bigserial PRIMARY KEY NOT NULL,
     video_url             TEXT                  NOT NULL,
     output_url            TEXT                  NOT NULL,
+    master_file_url       TEXT                  NOT NULL,
     status                VARCHAR(20)           NOT NULL DEFAULT 'todo',
     failed_reason         TEXT                  NOT NULL DEFAULT '',
     started_transcode_at  TIMESTAMPTZ,

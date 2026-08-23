@@ -86,4 +86,11 @@ func TestWatcher_Run(t *testing.T) {
 			require.Equal(t, te.expectedFailedReason, r.FailedReason)
 		})
 	}
+
+	t.Run("recover_from_panic", func(t *testing.T) {
+		w := NewWatcher(cfg, l, db)
+		w.transReqSvc = nil
+		err := w.Run(ctx)
+		require.ErrorContains(t, err, "invalid memory address or nil pointer dereference")
+	})
 }

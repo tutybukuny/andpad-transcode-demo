@@ -47,7 +47,8 @@ type Config struct {
 	RetriedTimesThreshold  int           `mapstructure:"retried_times_threshold"`
 
 	// transcode configurations
-	TranscodeOutputPrefix string `mapstructure:"transcode_output_prefix"`
+	TranscodeStoragePrefix   string `mapstructure:"transcode_storage_prefix"`
+	TranscodeStreamingPrefix string `mapstructure:"transcode_streaming_prefix"`
 }
 
 // New creates a new config for the application.
@@ -69,7 +70,8 @@ func (c *Config) SetDefault() {
 	viper.SetDefault("stalled_request_duration", 10*time.Second)
 	viper.SetDefault("retried_times_threshold", 3)
 
-	viper.SetDefault("transcode_output_prefix", "s3://local-bucket/transcode-output/")
+	viper.SetDefault("transcode_storage_prefix", "s3://local-bucket/transcode-output")
+	viper.SetDefault("transcode_streaming_prefix", "http://localhost:4566/local-bucket/transcode-output")
 }
 
 func (c *Config) GetDB() (*sql.DB, error) {
