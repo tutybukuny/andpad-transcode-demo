@@ -47,8 +47,11 @@ type Config struct {
 	RetriedTimesThreshold  int           `mapstructure:"retried_times_threshold"`
 
 	// transcode configurations
-	TranscodeStoragePrefix   string `mapstructure:"transcode_storage_prefix"`
-	TranscodeStreamingPrefix string `mapstructure:"transcode_streaming_prefix"`
+	TranscodeStoragePrefix         string        `mapstructure:"transcode_storage_prefix"`
+	TranscodeStreamingPrefix       string        `mapstructure:"transcode_streaming_prefix"`
+	TranscodeTimeLimit             time.Duration `mapstructure:"transcode_time_limit"`
+	WatchTransReqInterval          time.Duration `mapstructure:"watch_trans_req_interval"`
+	UpdateLastProcessingAtInterval time.Duration `mapstructure:"update_last_processing_at_interval"`
 }
 
 // New creates a new config for the application.
@@ -72,6 +75,9 @@ func (c *Config) SetDefault() {
 
 	viper.SetDefault("transcode_storage_prefix", "s3://local-bucket/transcode-output")
 	viper.SetDefault("transcode_streaming_prefix", "http://localhost:4566/local-bucket/transcode-output")
+	viper.SetDefault("transcode_time_limit", 10*time.Minute)
+	viper.SetDefault("watch_trans_req_interval", 5*time.Second)
+	viper.SetDefault("update_last_processing_at_interval", 5*time.Second)
 }
 
 func (c *Config) GetDB() (*sql.DB, error) {

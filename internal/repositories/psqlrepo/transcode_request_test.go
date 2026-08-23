@@ -85,8 +85,8 @@ func TestTranscodeRequestRepo_GetStalledProcessingRequests(t *testing.T) {
 		req := &entity.TranscodeRequest{
 			VideoURL:           utils.RandString(),
 			Status:             constant.TranscodeRequestStatusProcessing,
-			StartedTranscodeAt: new(time.Now().Add(-time.Minute)),
-			LastProcessingAt:   new(time.Now().Add(-time.Duration(i) * time.Second)),
+			StartedTranscodeAt: new(time.Now().Add(-20 * time.Minute)),
+			LastProcessingAt:   new(time.Now().Add(-time.Duration(i) * time.Minute)),
 		}
 		err := repo.Insert(ctx, req)
 		require.NoError(t, err)
@@ -96,15 +96,15 @@ func TestTranscodeRequestRepo_GetStalledProcessingRequests(t *testing.T) {
 		})
 	}
 
-	reqs, err := repo.GetStalledProcessingRequests(ctx, 10*time.Second, 0)
+	reqs, err := repo.GetStalledProcessingRequests(ctx, 30*time.Minute, 0)
 	require.NoError(t, err)
 	require.Empty(t, reqs)
 
-	reqs, err = repo.GetStalledProcessingRequests(ctx, 2*time.Second, 2)
+	reqs, err = repo.GetStalledProcessingRequests(ctx, 2*time.Minute, 2)
 	require.NoError(t, err)
 	require.Len(t, reqs, 2)
 
-	reqs, err = repo.GetStalledProcessingRequests(ctx, 2*time.Second, 0)
+	reqs, err = repo.GetStalledProcessingRequests(ctx, 2*time.Minute, 0)
 	require.NoError(t, err)
 	require.Len(t, reqs, 3)
 
@@ -112,4 +112,28 @@ func TestTranscodeRequestRepo_GetStalledProcessingRequests(t *testing.T) {
 		require.Equal(t, constant.TranscodeRequestStatusProcessing, req.Status)
 		require.True(t, req.LastProcessingAt.Before(time.Now().Add(-2*time.Second)))
 	}
+}
+
+func TestTranscodeRequestRepo_UpdateLastProcessingAt(t *testing.T) {
+	ctx := context.Background()
+	db := config.MustNewGorm(t)
+	repo := NewTranscodeRequestRepo(db)
+
+	req := &entity.TranscodeRequest{
+		VideoURL:           utils.RandString(),
+		Status:             constant.TranscodeRequestStatusProcessing,
+		StartedTranscodeAt: new(time.Now().Add(-20 * time.Minute)),
+		LastProcessingAt:   new(time.Now().Add(-10 * time.Second)),
+	}
+	err := repo.Insert(ctx, req)
+	require.NoError(t, err)
+	t.Cleanup(func() {
+		err = repo.Delete(ctx, req.ID)
+		require.NoError(t, err)
+	})
+	now := time.Now()
+	require.NoError(t, repo.UpdateLastProcessingAt(ctx, req.ID, time.Now()))
+	r, err := repo.FindByID(ctx, req.ID)
+	require.NoError(t, err)
+	require.GreaterOrEqual(t, r.LastProcessingAt.Unix(), now.Unix())
 }

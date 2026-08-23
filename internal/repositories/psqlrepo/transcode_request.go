@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	"transcode-demo/internal/constant"
+	"transcode-demo/internal/models"
 	"transcode-demo/internal/models/entity"
 	dbgorm "transcode-demo/pkg/db/gorm"
 )
@@ -46,4 +47,15 @@ func (r *TranscodeRequestRepo) GetStalledProcessingRequests(ctx context.Context,
 		return nil, fmt.Errorf("failed to get stalled processing requests: %w", err)
 	}
 	return reqs, nil
+}
+
+func (r *TranscodeRequestRepo) UpdateLastProcessingAt(ctx context.Context, reqID int64, lastProcessingAt time.Time) error {
+	affected, err := gorm.G[entity.TranscodeRequest](r.GetDB(ctx)).Where("id=?", reqID).Update(ctx, "last_processing_at", lastProcessingAt)
+	if err != nil {
+		return fmt.Errorf("failed to update last processing at: %w", err)
+	}
+	if affected == 0 {
+		return fmt.Errorf("failed to update last processing at: %w", models.ErrModelNotFound)
+	}
+	return nil
 }

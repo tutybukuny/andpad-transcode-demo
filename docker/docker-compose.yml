@@ -71,3 +71,17 @@ services:
       TDAPP_DB_PASSWORD: dev
       TDAPP_DB_NAME: tdapp
       TDAPP_DB_SSLMODE: disable
+
+  tdapp_worker:
+    image: tdapp:local
+    container_name: tdapp_worker
+    command: [ "./tdapp", "worker" ]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      TDAPP_DB_HOST: db
+      TDAPP_DB_USER: dev
+      TDAPP_DB_PASSWORD: dev
+      TDAPP_DB_NAME: tdapp
+      TDAPP_DB_SSLMODE: disable

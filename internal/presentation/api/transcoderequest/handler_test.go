@@ -91,6 +91,12 @@ func TestHandler_CreateTranscodeRequest(t *testing.T) {
 				SetError(&result).
 				Post("/transcode-request")
 			require.NoError(t, err)
+			if te.expectedStatusCode == 200 {
+				t.Cleanup(func() {
+					err = transReqRepo.Delete(ctx, result.Data.RequestID)
+					require.NoError(t, err)
+				})
+			}
 			require.Equal(t, te.expectedStatusCode, resp.StatusCode())
 			if te.assertFunc != nil {
 				te.assertFunc(t, te.videoURL, &result)

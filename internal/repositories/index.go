@@ -15,4 +15,5 @@ type ITranscodeRequestRepo interface {
 	db.IFindByID[entity.TranscodeRequest, int64]
 
 	GetStalledProcessingRequests(ctx context.Context, hangDuration time.Duration, limit int) ([]entity.TranscodeRequest, error)
+	UpdateLastProcessingAt(ctx context.Context, reqID int64, lastProcessingAt time.Time) error
 }

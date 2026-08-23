@@ -11,7 +11,6 @@ import (
 
 	"transcode-demo/internal/constant"
 	"transcode-demo/internal/models"
-	"transcode-demo/internal/models/entity"
 	"transcode-demo/pkg/cerrors"
 )
 
@@ -30,19 +29,25 @@ func (s *Service) Transcode(ctx context.Context, reqID int64) error {
 		return nil
 	case constant.TranscodeRequestStatusCancelled:
 		s.l.Info(fmt.Sprintf("transcode request %d already cancelled", reqID))
-		return nil
+		return models.ErrTranscodeRequestCancelled
 	case constant.TranscodeRequestStatusTodo:
 		// only allowed status
 	default:
 		return fmt.Errorf("transcode request status %s: %w", req.Status, models.ErrUnexpectedTranscodeRequestStatus)
 	}
 
-	trCtx, cancel := context.WithCancel(ctx)
+	req.Status = constant.TranscodeRequestStatusProcessing
+	req.StartedTranscodeAt = new(time.Now())
+	err = s.transReqRepo.Update(ctx, req)
+	if err != nil {
+		return cerrors.ErrInternal(err)
+	}
+
+	tCtx, cancel := context.WithTimeout(ctx, s.cfg.TranscodeTimeLimit)
 	defer cancel()
-	eg, gCtx := errgroup.WithContext(trCtx)
+	eg, gCtx := errgroup.WithContext(tCtx)
 	eg.Go(func() error {
-		defer cancel()
-		wErr := s.watchCancelRequest(gCtx, reqID, cancel)
+		wErr := s.watchCancelRequest(gCtx, reqID)
 		if wErr != nil {
 			s.l.Error("watchCancelRequest failed", z.Error(wErr))
 			return fmt.Errorf("watch cancel request failed: %w", wErr)
@@ -51,20 +56,35 @@ func (s *Service) Transcode(ctx context.Context, reqID int64) error {
 	})
 
 	eg.Go(func() error {
+		uErr := s.updateLastProcessingAt(gCtx, reqID)
+		if uErr != nil {
+			s.l.Error("updateLastProcessingAt failed", z.Error(uErr))
+			return fmt.Errorf("update last processing at failed: %w", uErr)
+		}
+		return nil
+	})
+
+	var outputFolder, masterFile string
+	eg.Go(func() error {
 		defer cancel()
-		tErr := s.transcodeRequest(gCtx, req)
+		var tErr error
+		outputFolder, masterFile, tErr = s.transcoder.Transcode(gCtx, req)
 		if tErr != nil {
 			s.l.Error("transcodeRequest failed", z.Error(tErr))
 			return fmt.Errorf("transcode request failed: %w", tErr)
 		}
 		return nil
 	})
+	err = eg.Wait()
+	if gCtx.Err() != nil && !errors.Is(gCtx.Err(), context.Canceled) {
+		err = errors.Join(err, gCtx.Err())
+	}
 
-	return nil
+	return s.handleResult(ctx, reqID, outputFolder, masterFile, err)
 }
 
-func (s *Service) watchCancelRequest(ctx context.Context, reqID int64, cancel context.CancelFunc) error {
-	ticker := time.NewTicker(5 * time.Second)
+func (s *Service) watchCancelRequest(ctx context.Context, reqID int64) error {
+	ticker := time.NewTicker(s.cfg.WatchTransReqInterval)
 	for {
 		select {
 		case <-ctx.Done():
@@ -78,31 +98,52 @@ func (s *Service) watchCancelRequest(ctx context.Context, reqID int64, cancel co
 			if req.Status == constant.TranscodeRequestStatusCancelled {
 				return models.ErrTranscodeRequestCancelled
 			}
-			ticker.Reset(5 * time.Second)
+			ticker.Reset(s.cfg.WatchTransReqInterval)
 		}
 	}
 }
 
-func (s *Service) transcodeRequest(ctx context.Context, req *entity.TranscodeRequest) error {
-	var outputFolder, masterFile string
-	outputFolder, masterFile, err := s.transcoder.Transcode(ctx, req)
+func (s *Service) updateLastProcessingAt(ctx context.Context, reqID int64) error {
+	timer := time.NewTimer(s.cfg.UpdateLastProcessingAtInterval)
+	for {
+		select {
+		case <-ctx.Done():
+			timer.Stop()
+			return nil
+		case <-timer.C:
+			uErr := s.transReqRepo.UpdateLastProcessingAt(ctx, reqID, time.Now())
+			if uErr != nil {
+				s.l.Error("updateLastProcessingAt failed", z.Error(uErr))
+				return fmt.Errorf("update last processing at failed: %w", uErr)
+			}
+			timer.Reset(s.cfg.UpdateLastProcessingAtInterval)
+		}
+	}
+}
+
+func (s *Service) handleResult(ctx context.Context, reqID int64, outputFolder, masterFile string, err error) error {
+	req, fErr := s.transReqRepo.FindByID(ctx, reqID)
+	if fErr != nil {
+		return fmt.Errorf("get req before update result: %w", err)
+	}
+	var cErr *cerrors.CError
 	switch {
-	case errors.As(err, &models.ErrTranscodeRequestCancelled):
-		s.l.Info(fmt.Sprintf("transcode request %d cancelled", req.ID))
-		return nil
+	case errors.As(err, &cErr):
+		if cErr.Code == models.ErrTranscodeRequestCancelled.Code {
+			s.l.Info(fmt.Sprintf("transcode request %d cancelled", req.ID))
+			return nil
+		}
+		fallthrough
 	case err != nil:
 		s.l.Error("transcode failed", z.Error(err))
 		req.Status = constant.TranscodeRequestStatusFailed
-		err = s.transReqRepo.Update(ctx, req)
-		if err != nil {
-			return cerrors.ErrInternal(err)
-		}
-		return err
+		req.FailedReason = err.Error()
+	default:
+		req.Status = constant.TranscodeRequestStatusCompleted
+		req.MasterFileURL = masterFile
+		req.OutputURL = outputFolder
 	}
 
-	req.Status = constant.TranscodeRequestStatusCompleted
-	req.MasterFileURL = masterFile
-	req.OutputURL = outputFolder
 	err = s.transReqRepo.Update(ctx, req)
 	if err != nil {
 		return cerrors.ErrInternal(err)

@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"context"
 	"fmt"
 	"math/rand"
 	"runtime"
 	"strings"
+	"time"
 	"unsafe"
 
 	z "go.uber.org/zap"
@@ -61,4 +63,13 @@ func Recover(l *z.Logger, f func() error) (err error) {
 	}()
 	err = f()
 	return
+}
+
+func SleepWithContext(ctx context.Context, d time.Duration) {
+	select {
+	case <-ctx.Done():
+		return
+	case <-time.After(d):
+		return
+	}
 }
