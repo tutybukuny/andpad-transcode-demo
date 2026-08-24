@@ -24,6 +24,7 @@ func newRootCmd(cfg *config.Config, l *z.Logger) *cobra.Command {
 	cmd.AddCommand(newMigrateCmd(cfg, l))
 	cmd.AddCommand(newAPICmd(cfg, l))
 	cmd.AddCommand(newWatcherCmd(cfg, l))
+	cmd.AddCommand(newWorkerCmd(cfg, l))
 	return cmd
 }
 

@@ -16,4 +16,5 @@ type ITranscodeRequestRepo interface {
 
 	GetStalledProcessingRequests(ctx context.Context, hangDuration time.Duration, limit int) ([]entity.TranscodeRequest, error)
 	UpdateLastProcessingAt(ctx context.Context, reqID int64, lastProcessingAt time.Time) error
+	PickRequest(ctx context.Context) (*entity.TranscodeRequest, error)
 }

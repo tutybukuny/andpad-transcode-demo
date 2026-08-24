@@ -46,6 +46,9 @@ type Config struct {
 	StalledRequestDuration time.Duration `mapstructure:"stalled_request_duration"`
 	RetriedTimesThreshold  int           `mapstructure:"retried_times_threshold"`
 
+	// worker configurations
+	GetTranscodeRequestInterval time.Duration `mapstructure:"get_transcode_request_interval"`
+
 	// transcode configurations
 	TranscodeStoragePrefix         string        `mapstructure:"transcode_storage_prefix"`
 	TranscodeStreamingPrefix       string        `mapstructure:"transcode_streaming_prefix"`
@@ -72,6 +75,8 @@ func (c *Config) SetDefault() {
 	viper.SetDefault("watcher_sleep_interval", 10*time.Second)
 	viper.SetDefault("stalled_request_duration", 10*time.Second)
 	viper.SetDefault("retried_times_threshold", 3)
+
+	viper.SetDefault("get_transcode_request_interval", 5*time.Second)
 
 	viper.SetDefault("transcode_storage_prefix", "s3://local-bucket/transcode-output")
 	viper.SetDefault("transcode_streaming_prefix", "http://localhost:4566/local-bucket/transcode-output")

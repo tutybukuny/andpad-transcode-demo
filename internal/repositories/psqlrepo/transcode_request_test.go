@@ -2,6 +2,8 @@ package psqlrepo
 
 import (
 	"context"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -9,6 +11,7 @@ import (
 
 	"transcode-demo/config"
 	"transcode-demo/internal/constant"
+	"transcode-demo/internal/models"
 	"transcode-demo/internal/models/entity"
 	"transcode-demo/pkg/utils"
 )
@@ -136,4 +139,39 @@ func TestTranscodeRequestRepo_UpdateLastProcessingAt(t *testing.T) {
 	r, err := repo.FindByID(ctx, req.ID)
 	require.NoError(t, err)
 	require.GreaterOrEqual(t, r.LastProcessingAt.Unix(), now.Unix())
+}
+
+func TestTranscodeRequestRepo_PickRequest(t *testing.T) {
+	ctx := context.Background()
+	db := config.MustNewGorm(t)
+	repo := NewTranscodeRequestRepo(db)
+
+	for range 1000 {
+		req := &entity.TranscodeRequest{
+			VideoURL: utils.RandString(),
+			Status:   constant.TranscodeRequestStatusTodo,
+		}
+		err := repo.Insert(ctx, req)
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			err = repo.Delete(ctx, req.ID)
+		})
+
+		wg := sync.WaitGroup{}
+		var count atomic.Int32
+		for range 2 {
+			wg.Go(func() {
+				r, iErr := repo.PickRequest(ctx)
+				if iErr != nil {
+					require.ErrorIs(t, iErr, models.ErrModelNotFound)
+					return
+				}
+				count.Add(1)
+				require.Equal(t, req.ID, r.ID)
+				require.Equal(t, constant.TranscodeRequestStatusProcessing, r.Status)
+			})
+		}
+		wg.Wait()
+		require.Equal(t, 1, int(count.Load()))
+	}
 }

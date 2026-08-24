@@ -2,10 +2,12 @@ package psqlrepo
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 
 	"transcode-demo/internal/constant"
 	"transcode-demo/internal/models"
@@ -58,4 +60,28 @@ func (r *TranscodeRequestRepo) UpdateLastProcessingAt(ctx context.Context, reqID
 		return fmt.Errorf("failed to update last processing at: %w", models.ErrModelNotFound)
 	}
 	return nil
+}
+
+func (r *TranscodeRequestRepo) PickRequest(ctx context.Context) (*entity.TranscodeRequest, error) {
+	var req entity.TranscodeRequest
+	err := r.GetDB(ctx).Transaction(func(tx *gorm.DB) error {
+		result := tx.Clauses(clause.Locking{
+			Strength: "UPDATE",
+			Options:  "SKIP LOCKED",
+		}).Where("status = ?", constant.TranscodeRequestStatusTodo).
+			Order("updated_at ASC").
+			First(&req)
+		switch {
+		case errors.Is(result.Error, gorm.ErrRecordNotFound):
+			return models.ErrModelNotFound
+		case result.Error != nil:
+			return result.Error
+		}
+		req.Status = constant.TranscodeRequestStatusProcessing
+		return tx.Save(&req).Error
+	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to pick request: %w", err)
+	}
+	return &req, nil
 }
