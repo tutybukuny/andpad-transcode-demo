@@ -1,0 +1,303 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/health": {
+            "get": {
+                "description": "API for health check",
+                "tags": [
+                    "healthcheck"
+                ],
+                "summary": "health check point",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/transcode-demo_internal_models_response.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/transcode-demo_internal_models_response.Response-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/transcode-request": {
+            "post": {
+                "description": "Create new transcode request",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transcode-request"
+                ],
+                "summary": "Create transcode request",
+                "parameters": [
+                    {
+                        "description": "CreateTranscodeRequestReq",
+                        "name": "CreateTranscodeRequestReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/internal_presentation_api_transcoderequest.CreateTranscodeRequestReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/transcode-demo_internal_models_response.Response-internal_presentation_api_transcoderequest_CreateTranscodeRequestResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/transcode-demo_internal_models_response.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/transcode-demo_internal_models_response.Response-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/transcode-request/{id}": {
+            "get": {
+                "description": "Get specific transcode request",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transcode-request"
+                ],
+                "summary": "Get transcode request",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/transcode-demo_internal_models_response.Response-internal_presentation_api_transcoderequest_GetTranscodeRequestResp"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/transcode-demo_internal_models_response.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/transcode-demo_internal_models_response.Response-any"
+                        }
+                    }
+                }
+            }
+        },
+        "/transcode-request/{id}/cancel": {
+            "get": {
+                "description": "Cancel a specific transcode request",
+                "tags": [
+                    "transcode-request"
+                ],
+                "summary": "Cancel transcode request",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/transcode-demo_internal_models_response.Response-any"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/transcode-demo_internal_models_response.Response-any"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/transcode-demo_internal_models_response.Response-any"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "internal_presentation_api_transcoderequest.CreateTranscodeRequestReq": {
+            "type": "object",
+            "required": [
+                "video_url"
+            ],
+            "properties": {
+                "video_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "internal_presentation_api_transcoderequest.CreateTranscodeRequestResp": {
+            "type": "object",
+            "properties": {
+                "request_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "internal_presentation_api_transcoderequest.GetTranscodeRequestResp": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "failed_reason": {
+                    "type": "string"
+                },
+                "finished_transcode_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_processing_at": {
+                    "type": "string"
+                },
+                "master_file_url": {
+                    "type": "string"
+                },
+                "output_url": {
+                    "type": "string"
+                },
+                "retried_times": {
+                    "type": "integer"
+                },
+                "started_transcode_at": {
+                    "type": "string"
+                },
+                "status": {
+                    "$ref": "#/definitions/transcode-demo_internal_constant.TranscodeRequestStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "video_url": {
+                    "type": "string"
+                }
+            }
+        },
+        "transcode-demo_internal_constant.TranscodeRequestStatus": {
+            "type": "string",
+            "enum": [
+                "todo",
+                "processing",
+                "completed",
+                "failed",
+                "cancelled"
+            ],
+            "x-enum-varnames": [
+                "TranscodeRequestStatusTodo",
+                "TranscodeRequestStatusProcessing",
+                "TranscodeRequestStatusCompleted",
+                "TranscodeRequestStatusFailed",
+                "TranscodeRequestStatusCancelled"
+            ]
+        },
+        "transcode-demo_internal_models_response.Response-any": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "$ref": "#/definitions/transcode-demo_pkg_cerrors.Code"
+                },
+                "data": {},
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "transcode-demo_internal_models_response.Response-internal_presentation_api_transcoderequest_CreateTranscodeRequestResp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "$ref": "#/definitions/transcode-demo_pkg_cerrors.Code"
+                },
+                "data": {
+                    "$ref": "#/definitions/internal_presentation_api_transcoderequest.CreateTranscodeRequestResp"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "transcode-demo_internal_models_response.Response-internal_presentation_api_transcoderequest_GetTranscodeRequestResp": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "$ref": "#/definitions/transcode-demo_pkg_cerrors.Code"
+                },
+                "data": {
+                    "$ref": "#/definitions/internal_presentation_api_transcoderequest.GetTranscodeRequestResp"
+                },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "transcode-demo_pkg_cerrors.Code": {
+            "type": "integer",
+            "enum": [
+                200,
+                201,
+                202,
+                204,
+                400,
+                401,
+                403,
+                404,
+                405,
+                406,
+                408,
+                409,
+                412,
+                500,
+                503
+            ],
+            "x-enum-varnames": [
+                "OK",
+                "Created",
+                "Accepted",
+                "NoContent",
+                "BadRequest",
+                "Unauthorized",
+                "Forbidden",
+                "NotFound",
+                "MethodNotAllow",
+                "NotAcceptable",
+                "RequestTimeout",
+                "Conflict",
+                "PreconditionFailed",
+                "InternalServerError",
+                "ServiceUnavailable"
+            ]
+        }
+    }
+}

@@ -1,0 +1,209 @@
+definitions:
+  internal_presentation_api_transcoderequest.CreateTranscodeRequestReq:
+    properties:
+      video_url:
+        type: string
+    required:
+    - video_url
+    type: object
+  internal_presentation_api_transcoderequest.CreateTranscodeRequestResp:
+    properties:
+      request_id:
+        type: integer
+    type: object
+  internal_presentation_api_transcoderequest.GetTranscodeRequestResp:
+    properties:
+      created_at:
+        type: string
+      failed_reason:
+        type: string
+      finished_transcode_at:
+        type: string
+      id:
+        type: integer
+      last_processing_at:
+        type: string
+      master_file_url:
+        type: string
+      output_url:
+        type: string
+      retried_times:
+        type: integer
+      started_transcode_at:
+        type: string
+      status:
+        $ref: '#/definitions/transcode-demo_internal_constant.TranscodeRequestStatus'
+      updated_at:
+        type: string
+      video_url:
+        type: string
+    type: object
+  transcode-demo_internal_constant.TranscodeRequestStatus:
+    enum:
+    - todo
+    - processing
+    - completed
+    - failed
+    - cancelled
+    type: string
+    x-enum-varnames:
+    - TranscodeRequestStatusTodo
+    - TranscodeRequestStatusProcessing
+    - TranscodeRequestStatusCompleted
+    - TranscodeRequestStatusFailed
+    - TranscodeRequestStatusCancelled
+  transcode-demo_internal_models_response.Response-any:
+    properties:
+      code:
+        $ref: '#/definitions/transcode-demo_pkg_cerrors.Code'
+      data: {}
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  transcode-demo_internal_models_response.Response-internal_presentation_api_transcoderequest_CreateTranscodeRequestResp:
+    properties:
+      code:
+        $ref: '#/definitions/transcode-demo_pkg_cerrors.Code'
+      data:
+        $ref: '#/definitions/internal_presentation_api_transcoderequest.CreateTranscodeRequestResp'
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  transcode-demo_internal_models_response.Response-internal_presentation_api_transcoderequest_GetTranscodeRequestResp:
+    properties:
+      code:
+        $ref: '#/definitions/transcode-demo_pkg_cerrors.Code'
+      data:
+        $ref: '#/definitions/internal_presentation_api_transcoderequest.GetTranscodeRequestResp'
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  transcode-demo_pkg_cerrors.Code:
+    enum:
+    - 200
+    - 201
+    - 202
+    - 204
+    - 400
+    - 401
+    - 403
+    - 404
+    - 405
+    - 406
+    - 408
+    - 409
+    - 412
+    - 500
+    - 503
+    type: integer
+    x-enum-varnames:
+    - OK
+    - Created
+    - Accepted
+    - NoContent
+    - BadRequest
+    - Unauthorized
+    - Forbidden
+    - NotFound
+    - MethodNotAllow
+    - NotAcceptable
+    - RequestTimeout
+    - Conflict
+    - PreconditionFailed
+    - InternalServerError
+    - ServiceUnavailable
+info:
+  contact: {}
+paths:
+  /health:
+    get:
+      description: API for health check
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transcode-demo_internal_models_response.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/transcode-demo_internal_models_response.Response-any'
+      summary: health check point
+      tags:
+      - healthcheck
+  /transcode-request:
+    post:
+      consumes:
+      - application/json
+      description: Create new transcode request
+      parameters:
+      - description: CreateTranscodeRequestReq
+        in: body
+        name: CreateTranscodeRequestReq
+        required: true
+        schema:
+          $ref: '#/definitions/internal_presentation_api_transcoderequest.CreateTranscodeRequestReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transcode-demo_internal_models_response.Response-internal_presentation_api_transcoderequest_CreateTranscodeRequestResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/transcode-demo_internal_models_response.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/transcode-demo_internal_models_response.Response-any'
+      summary: Create transcode request
+      tags:
+      - transcode-request
+  /transcode-request/{id}:
+    get:
+      description: Get specific transcode request
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transcode-demo_internal_models_response.Response-internal_presentation_api_transcoderequest_GetTranscodeRequestResp'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/transcode-demo_internal_models_response.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/transcode-demo_internal_models_response.Response-any'
+      summary: Get transcode request
+      tags:
+      - transcode-request
+  /transcode-request/{id}/cancel:
+    get:
+      description: Cancel a specific transcode request
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/transcode-demo_internal_models_response.Response-any'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/transcode-demo_internal_models_response.Response-any'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/transcode-demo_internal_models_response.Response-any'
+      summary: Cancel transcode request
+      tags:
+      - transcode-request
+swagger: "2.0"

@@ -5,6 +5,7 @@ import (
 	z "go.uber.org/zap"
 
 	"transcode-demo/config"
+	_ "transcode-demo/docs"
 	"transcode-demo/internal/presentation/api"
 	"transcode-demo/pkg/utils"
 )

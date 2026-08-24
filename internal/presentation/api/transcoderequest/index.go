@@ -22,7 +22,17 @@ func NewHandler(l *z.Logger, transReqSvc *transcoderequestsvc.Service) *Handler 
 	}
 }
 
-// CreateTranscodeRequest POST /transcode
+// CreateTranscodeRequest godoc
+// @Summary      Create transcode request
+// @Description  Create new transcode request
+// @Tags         transcode-request
+// @Accept       json
+// @Produce      json
+// @Param		 CreateTranscodeRequestReq body CreateTranscodeRequestReq true "CreateTranscodeRequestReq"
+// @Success      200  {object}  response.Response[CreateTranscodeRequestResp]
+// @Failure      400  {object}  response.Response[any]
+// @Failure      500  {object}  response.Response[any]
+// @Router       /transcode-request [post]
 func (h *Handler) CreateTranscodeRequest(c fiber.Ctx) error {
 	req := new(CreateTranscodeRequestReq)
 	if err := c.Bind().Body(req); err != nil {
@@ -39,7 +49,15 @@ func (h *Handler) CreateTranscodeRequest(c fiber.Ctx) error {
 		JSON(c)
 }
 
-// GetTranscodeRequest GET /transcode-request/:id
+// GetTranscodeRequest godoc
+// @Summary      Get transcode request
+// @Description  Get specific transcode request
+// @Tags         transcode-request
+// @Produce      json
+// @Success      200  {object}  response.Response[GetTranscodeRequestResp]
+// @Failure      400  {object}  response.Response[any]
+// @Failure      500  {object}  response.Response[any]
+// @Router       /transcode-request/{id} [get]
 func (h *Handler) GetTranscodeRequest(c fiber.Ctx) error {
 	req := new(GetTranscodeRequestReq)
 	if err := c.Bind().URI(req); err != nil {
@@ -56,7 +74,14 @@ func (h *Handler) GetTranscodeRequest(c fiber.Ctx) error {
 		JSON(c)
 }
 
-// CancelTranscodeRequest POST /transcode-request/:id/cancel
+// CancelTranscodeRequest godoc
+// @Summary      Cancel transcode request
+// @Description  Cancel a specific transcode request
+// @Tags         transcode-request
+// @Success      200  {object}  response.Response[any]
+// @Failure      400  {object}  response.Response[any]
+// @Failure      500  {object}  response.Response[any]
+// @Router       /transcode-request/{id}/cancel [get]
 func (h *Handler) CancelTranscodeRequest(c fiber.Ctx) error {
 	req := new(CancelTranscodeRequestReq)
 	if err := c.Bind().URI(req); err != nil {

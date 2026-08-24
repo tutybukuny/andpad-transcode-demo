@@ -10,3 +10,5 @@ local-up: tdapp
 local-down:
 	cd docker && \
 	docker compose down
+swagger:
+	swag init -g cmd/main.go --parseInternal --parseDependency
