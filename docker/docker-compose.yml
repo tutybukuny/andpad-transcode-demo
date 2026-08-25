@@ -48,6 +48,8 @@ services:
     image: tdapp:local
     container_name: tdapp_api
     command: [ "./tdapp", "api" ]
+    ports:
+      - "8000:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -85,3 +87,7 @@ services:
       TDAPP_DB_PASSWORD: dev
       TDAPP_DB_NAME: tdapp
       TDAPP_DB_SSLMODE: disable
+      TDAPP_AWS_ACCESS_KEY_ID: test
+      TDAPP_AWS_SECRET_ACCESS_KEY: test
+      TDAPP_AWS_REGION: us-east-1
+      TDAPP_AWS_ENDPOINT: http://localstack:4566

@@ -30,14 +30,14 @@ func (s *Service) Transcode(ctx context.Context, reqID int64) error {
 	case constant.TranscodeRequestStatusCancelled:
 		s.l.Info(fmt.Sprintf("transcode request %d already cancelled", reqID))
 		return models.ErrTranscodeRequestCancelled
-	case constant.TranscodeRequestStatusTodo:
+	case constant.TranscodeRequestStatusProcessing:
 		// only allowed status
 	default:
 		return fmt.Errorf("transcode request status %s: %w", req.Status, models.ErrUnexpectedTranscodeRequestStatus)
 	}
 
-	req.Status = constant.TranscodeRequestStatusProcessing
 	req.StartedTranscodeAt = new(time.Now())
+	req.LastProcessingAt = new(time.Now())
 	err = s.transReqRepo.Update(ctx, req)
 	if err != nil {
 		return cerrors.ErrInternal(err)
@@ -140,6 +140,7 @@ func (s *Service) handleResult(ctx context.Context, reqID int64, outputFolder, m
 		req.FailedReason = err.Error()
 	default:
 		req.Status = constant.TranscodeRequestStatusCompleted
+		req.FinishedTranscodeAt = new(time.Now())
 		req.MasterFileURL = masterFile
 		req.OutputURL = outputFolder
 	}

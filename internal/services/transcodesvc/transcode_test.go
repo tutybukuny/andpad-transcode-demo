@@ -59,8 +59,8 @@ func TestService_Transcode(t *testing.T) {
 		assertFunc     func(t *testing.T, req *entity.TranscodeRequest)
 	}{
 		{
-			name:           "request_todo",
-			status:         constant.TranscodeRequestStatusTodo,
+			name:           "request_processing",
+			status:         constant.TranscodeRequestStatusProcessing,
 			expectedStatus: constant.TranscodeRequestStatusCompleted,
 			assertFunc: func(t *testing.T, req *entity.TranscodeRequest) {
 				require.NotEmpty(t, req.OutputURL)
@@ -78,12 +78,12 @@ func TestService_Transcode(t *testing.T) {
 		},
 		{
 			name:        "request_processing",
-			status:      constant.TranscodeRequestStatusProcessing,
+			status:      constant.TranscodeRequestStatusTodo,
 			expectedErr: models.ErrUnexpectedTranscodeRequestStatus,
 		},
 		{
 			name:   "request_not_found",
-			status: constant.TranscodeRequestStatusTodo,
+			status: constant.TranscodeRequestStatusProcessing,
 			preRunFunc: func(t *testing.T, req *entity.TranscodeRequest) {
 				err := transReqRepo.Delete(ctx, req.ID)
 				require.NoError(t, err)
@@ -92,7 +92,7 @@ func TestService_Transcode(t *testing.T) {
 		},
 		{
 			name:   "request_invalid_url",
-			status: constant.TranscodeRequestStatusTodo,
+			status: constant.TranscodeRequestStatusProcessing,
 			preRunFunc: func(t *testing.T, req *entity.TranscodeRequest) {
 				req.VideoURL = "invalid_url"
 				err := transReqRepo.Update(ctx, req)
@@ -123,7 +123,7 @@ func TestService_Transcode(t *testing.T) {
 	}
 
 	t.Run("request_cancelled", func(t *testing.T) {
-		req := fixtureReq(t, constant.TranscodeRequestStatusTodo)
+		req := fixtureReq(t, constant.TranscodeRequestStatusProcessing)
 		cCfg := config.MustNewDevConfig(t)
 		cCfg.WatchTransReqInterval = 100 * time.Millisecond
 		s := NewService(cCfg, l, db)
@@ -142,7 +142,7 @@ func TestService_Transcode(t *testing.T) {
 	})
 
 	t.Run("timeout", func(t *testing.T) {
-		req := fixtureReq(t, constant.TranscodeRequestStatusTodo)
+		req := fixtureReq(t, constant.TranscodeRequestStatusProcessing)
 		cCfg := config.MustNewDevConfig(t)
 		cCfg.TranscodeTimeLimit = 100 * time.Millisecond
 		s := NewService(cCfg, l, db)
@@ -155,7 +155,7 @@ func TestService_Transcode(t *testing.T) {
 	})
 
 	t.Run("check_update_last_processing_at", func(t *testing.T) {
-		req := fixtureReq(t, constant.TranscodeRequestStatusTodo)
+		req := fixtureReq(t, constant.TranscodeRequestStatusProcessing)
 		cCfg := config.MustNewDevConfig(t)
 		cCfg.UpdateLastProcessingAtInterval = 100 * time.Millisecond
 		s := NewService(cCfg, l, db)
@@ -175,5 +175,7 @@ func TestService_Transcode(t *testing.T) {
 		req, err = transReqRepo.FindByID(ctx, req.ID)
 		require.NoError(t, err)
 		require.Equal(t, constant.TranscodeRequestStatusCompleted, req.Status)
+		require.NotNil(t, req.StartedTranscodeAt)
+		require.NotNil(t, req.FinishedTranscodeAt)
 	})
 }
