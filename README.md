@@ -100,5 +100,10 @@ The API is built with Fiber v3 and provides endpoints for managing transcoding j
 ### Testing
 Run tests using Go's standard testing framework:
 ```bash
-go test ./...
+go test ./... -count=1 -p=1
+```
+
+Run test cases with jupyter notebook:
+```bash
+make jupyterlab
 ```

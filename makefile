@@ -12,3 +12,5 @@ local-down:
 	docker compose down
 swagger:
 	swag init -g cmd/main.go --parseInternal --parseDependency
+jupiterlab:
+	python3 -m jupyter lab

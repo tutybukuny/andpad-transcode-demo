@@ -114,11 +114,11 @@ func TestHandler_GetTranscodeRequest(t *testing.T) {
 
 	// fixture a request
 	transReq := &entity.TranscodeRequest{
-		VideoURL:            utils.RandString(),
-		OutputURL:           utils.RandString(),
-		Status:              constant.TranscodeRequestStatusCompleted,
-		StartedTranscodeAt:  new(time.Now().Add(-10 * time.Minute)),
-		FinishedTranscodeAt: new(time.Now().Add(-5 * time.Minute)),
+		VideoURL:           utils.RandString(),
+		OutputURL:          utils.RandString(),
+		Status:             constant.TranscodeRequestStatusCompleted,
+		StartedTranscodeAt: new(time.Now().Add(-10 * time.Minute)),
+		StoppedAt:          new(time.Now().Add(-5 * time.Minute)),
 	}
 	err := transReqRepo.Insert(ctx, transReq)
 	require.NoError(t, err)
@@ -151,7 +151,7 @@ func TestHandler_GetTranscodeRequest(t *testing.T) {
 				require.Equal(t, transReq.OutputURL, result.Data.TranscodeRequest.OutputURL)
 				require.Equal(t, transReq.Status, result.Data.TranscodeRequest.Status)
 				require.Equal(t, transReq.StartedTranscodeAt.Unix(), result.Data.TranscodeRequest.StartedTranscodeAt.Unix())
-				require.Equal(t, transReq.FinishedTranscodeAt.Unix(), result.Data.TranscodeRequest.FinishedTranscodeAt.Unix())
+				require.Equal(t, transReq.StoppedAt.Unix(), result.Data.TranscodeRequest.StoppedAt.Unix())
 			},
 		},
 		{

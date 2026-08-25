@@ -2,3 +2,4 @@
 /vendor/
 .idea/
 .venv/
+/notebook/.ipynb_checkpoints/

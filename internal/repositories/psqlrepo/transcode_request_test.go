@@ -43,17 +43,17 @@ func TestNewTranscodeRequestRepo(t *testing.T) {
 	require.Equal(t, req.OutputURL, dbReq.OutputURL)
 	require.Equal(t, constant.TranscodeRequestStatusTodo, dbReq.Status)
 	require.Nil(t, dbReq.StartedTranscodeAt)
-	require.Nil(t, dbReq.FinishedTranscodeAt)
+	require.Nil(t, dbReq.StoppedAt)
 	require.Equal(t, req.CreatedAt.Unix(), dbReq.CreatedAt.Unix())
 	require.Equal(t, req.UpdatedAt.Unix(), dbReq.UpdatedAt.Unix())
 
 	// update transcode request
 	outputURL := utils.RandString()
 	startedTranscodeAt := now.Add(-10 * time.Minute)
-	finishedTranscodeAt := now.Add(10 * time.Minute)
+	stoppedAt := now.Add(10 * time.Minute)
 	dbReq.Status = constant.TranscodeRequestStatusCompleted
 	dbReq.StartedTranscodeAt = &startedTranscodeAt
-	dbReq.FinishedTranscodeAt = &finishedTranscodeAt
+	dbReq.StoppedAt = &stoppedAt
 	dbReq.OutputURL = outputURL
 	err = repo.Update(ctx, dbReq)
 	require.NoError(t, err)
@@ -62,7 +62,7 @@ func TestNewTranscodeRequestRepo(t *testing.T) {
 	require.Equal(t, constant.TranscodeRequestStatusCompleted, dbReq.Status)
 	require.Equal(t, outputURL, dbReq.OutputURL)
 	require.Equal(t, startedTranscodeAt.Unix(), dbReq.StartedTranscodeAt.Unix())
-	require.Equal(t, finishedTranscodeAt.Unix(), dbReq.FinishedTranscodeAt.Unix())
+	require.Equal(t, stoppedAt.Unix(), dbReq.StoppedAt.Unix())
 
 	// reinsert, make sure no duplicate id
 	req.ID = 0

@@ -139,6 +139,7 @@ func TestService_Transcode(t *testing.T) {
 		req, err = transReqRepo.FindByID(ctx, req.ID)
 		require.NoError(t, err)
 		require.Equal(t, constant.TranscodeRequestStatusCancelled, req.Status)
+		require.NotNil(t, req.StoppedAt)
 	})
 
 	t.Run("timeout", func(t *testing.T) {
@@ -176,6 +177,6 @@ func TestService_Transcode(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, constant.TranscodeRequestStatusCompleted, req.Status)
 		require.NotNil(t, req.StartedTranscodeAt)
-		require.NotNil(t, req.FinishedTranscodeAt)
+		require.NotNil(t, req.StoppedAt)
 	})
 }

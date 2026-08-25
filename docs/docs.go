@@ -175,9 +175,6 @@ const docTemplate = `{
                 "failed_reason": {
                     "type": "string"
                 },
-                "finished_transcode_at": {
-                    "type": "string"
-                },
                 "id": {
                     "type": "integer"
                 },
@@ -198,6 +195,9 @@ const docTemplate = `{
                 },
                 "status": {
                     "$ref": "#/definitions/transcode-demo_internal_constant.TranscodeRequestStatus"
+                },
+                "stopped_at": {
+                    "type": "string"
                 },
                 "updated_at": {
                     "type": "string"

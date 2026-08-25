@@ -131,7 +131,8 @@ func (s *Service) handleResult(ctx context.Context, reqID int64, outputFolder, m
 	case errors.As(err, &cErr):
 		if cErr.Code == models.ErrTranscodeRequestCancelled.Code {
 			s.l.Info(fmt.Sprintf("transcode request %d cancelled", req.ID))
-			return nil
+			req.StoppedAt = new(time.Now())
+			break
 		}
 		fallthrough
 	case err != nil:
@@ -140,7 +141,7 @@ func (s *Service) handleResult(ctx context.Context, reqID int64, outputFolder, m
 		req.FailedReason = err.Error()
 	default:
 		req.Status = constant.TranscodeRequestStatusCompleted
-		req.FinishedTranscodeAt = new(time.Now())
+		req.StoppedAt = new(time.Now())
 		req.MasterFileURL = masterFile
 		req.OutputURL = outputFolder
 	}
