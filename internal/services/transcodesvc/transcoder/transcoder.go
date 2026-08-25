@@ -97,7 +97,7 @@ func (t *Transcoder) execFfmpeg(ctx context.Context, outputFolder, inputFile str
 		"-filter:v:1", "scale=1280:720", "-b:v:1", "2800k", "-maxrate:v:1", "2996k", "-bufsize:v:1", "4200k", "-b:a:1", "128k",
 		"-filter:v:2", "scale=854:480", "-b:v:2", "1400k", "-maxrate:v:2", "1498k", "-bufsize:v:2", "2100k", "-b:a:2", "96k",
 		"-var_stream_map", "v:0,a:0,name:1080p v:1,a:1,name:720p v:2,a:2,name:480p",
-		"-preset", "veryfast", "-hls_time", "6", "-hls_list_size", "0",
+		"-preset", "slow", "-hls_time", "6", "-hls_list_size", "0",
 		"-hls_flags", "independent_segments",
 		"-master_pl_name", "master.m3u8",
 		fmt.Sprintf("%s/output_%%v.m3u8", outputFolder),

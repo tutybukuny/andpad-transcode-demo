@@ -3,6 +3,7 @@ package worker
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	z "go.uber.org/zap"
@@ -43,24 +44,28 @@ func (w *Worker) Run(ctx context.Context) error {
 			w.l.Info("worker stopped")
 			return nil
 		case <-ticker.C:
-			req, err := w.transReqRepo.PickRequest(ctx)
-			switch {
-			case errors.Is(err, models.ErrModelNotFound):
-				w.l.Info("no transcode request found, waiting...")
-				ticker.Reset(w.cfg.GetTranscodeRequestInterval)
-				continue
-			case err != nil:
-				w.l.Error("failed to pick request", z.Error(err))
-				ticker.Reset(w.cfg.GetTranscodeRequestInterval)
-				continue
-			}
-
-			err = utils.Recover(w.l, func() error {
-				return w.transSvc.Transcode(ctx, req.ID)
+			err := utils.Recover(w.l, func() error {
+				return w.PickAndProcess(ctx)
 			})
 			if err != nil {
-				w.l.Error("failed to transcode request", z.Int64("req_id", req.ID), z.Error(err))
+				w.l.Error("failed to pick and process transcode request", z.Error(err))
 			}
 		}
 	}
+}
+
+func (w *Worker) PickAndProcess(ctx context.Context) error {
+	req, err := w.transReqRepo.PickRequest(ctx)
+	switch {
+	case errors.Is(err, models.ErrModelNotFound):
+		w.l.Info("no transcode request found, waiting...")
+		return nil
+	case err != nil:
+		return fmt.Errorf("failed to pick request: %w", err)
+	}
+
+	if err = w.transSvc.Transcode(ctx, req.ID); err != nil {
+		return fmt.Errorf("failed to transcode request: %w", err)
+	}
+	return nil
 }
