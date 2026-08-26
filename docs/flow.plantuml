@@ -1,0 +1,85 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+Actor user
+Participant API as api
+Participant worker as worker
+Participant watcher
+Database DB
+Collections "Cloud Storage" as cloud
+
+group "create request"
+autonumber
+user -> api: Send video URL
+activate api
+api -> DB: Save request to DB
+api --> user: return result
+deactivate api
+end
+
+group "cancel request"
+autonumber
+user -> api: cancel request
+activate api
+alt found request
+api -> DB: get request
+activate DB
+DB --> api: return request
+deactivate DB
+api -> DB: set request status to cancel
+api --> user: return success result
+end
+alt not found request
+autonumber 2
+api -> DB: get request
+activate DB
+DB --> api: return not found
+deactivate DB
+api --> user: return failed result
+end
+deactivate api
+end
+
+group transcode video
+autonumber
+activate worker
+alt no todo request
+worker -> DB: lock todo request to processing
+activate DB
+DB --> worker: no request
+deactivate DB
+worker -> worker: sleep
+end
+alt has todo request
+autonumber 1
+worker -> DB: lock todo request to processing
+activate DB
+DB --> worker: request
+deactivate DB
+worker -> worker: transcode video
+autonumber 3.1
+activate worker
+alt success
+worker -> cloud: save data to cloud
+worker -> DB: update request as completed
+end
+alt failed
+autonumber 3.1
+worker -> DB: update request as failed
+end
+end
+deactivate worker
+end
+
+group watching request
+autonumber 1
+watcher -> DB: get stuck request\nwhich not over retry threshold
+activate watcher
+activate DB
+DB --> watcher: return request
+deactivate DB
+watcher -> DB: increasing retry time\nand move back status to todo
+end
+
+@enduml
+

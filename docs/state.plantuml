@@ -1,0 +1,9 @@
+@startuml
+'https://plantuml.com/sequence-diagram
+
+
+[*] --> todo
+todo --> processing
+processing --> completed
+processing --> todo
+@enduml
