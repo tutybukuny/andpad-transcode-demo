@@ -6,4 +6,10 @@
 todo --> processing
 processing --> completed
 processing --> todo
+processing --> failed
+todo --> cancelled
+processing --> cancelled
+completed --> [*]
+failed --> [*]
+cancelled --> [*]
 @enduml

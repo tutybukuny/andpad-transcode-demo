@@ -81,7 +81,7 @@ func (h *Handler) GetTranscodeRequest(c fiber.Ctx) error {
 // @Success      200  {object}  response.Response[any]
 // @Failure      400  {object}  response.Response[any]
 // @Failure      500  {object}  response.Response[any]
-// @Router       /transcode-request/{id}/cancel [get]
+// @Router       /transcode-request/{id}/cancel [post]
 func (h *Handler) CancelTranscodeRequest(c fiber.Ctx) error {
 	req := new(CancelTranscodeRequestReq)
 	if err := c.Bind().URI(req); err != nil {

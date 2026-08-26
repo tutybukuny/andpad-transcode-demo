@@ -44,6 +44,7 @@ type Config struct {
 	// watcher configurations
 	WatcherSleepInterval   time.Duration `mapstructure:"watcher_sleep_interval"`
 	StalledRequestDuration time.Duration `mapstructure:"stalled_request_duration"`
+	StalledRequestBatch    int           `mapstructure:"stalled_request_batch"`
 	RetriedTimesThreshold  int           `mapstructure:"retried_times_threshold"`
 
 	// worker configurations
@@ -74,6 +75,7 @@ func (c *Config) SetDefault() {
 
 	viper.SetDefault("watcher_sleep_interval", 10*time.Second)
 	viper.SetDefault("stalled_request_duration", 10*time.Second)
+	viper.SetDefault("stalled_request_batch", 1000)
 	viper.SetDefault("retried_times_threshold", 3)
 
 	viper.SetDefault("get_transcode_request_interval", 5*time.Second)

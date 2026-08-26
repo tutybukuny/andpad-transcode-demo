@@ -117,7 +117,7 @@ const docTemplate = `{
             }
         },
         "/transcode-request/{id}/cancel": {
-            "get": {
+            "post": {
                 "description": "Cancel a specific transcode request",
                 "tags": [
                     "transcode-request"

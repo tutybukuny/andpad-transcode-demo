@@ -188,7 +188,7 @@ paths:
       tags:
       - transcode-request
   /transcode-request/{id}/cancel:
-    get:
+    post:
       description: Cancel a specific transcode request
       responses:
         "200":

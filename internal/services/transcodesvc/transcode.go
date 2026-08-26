@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	z "go.uber.org/zap"
@@ -76,7 +77,7 @@ func (s *Service) Transcode(ctx context.Context, reqID int64) error {
 		return nil
 	})
 	err = eg.Wait()
-	if gCtx.Err() != nil && !errors.Is(gCtx.Err(), context.Canceled) {
+	if gCtx.Err() != nil && !strings.Contains(gCtx.Err().Error(), "context canceled") {
 		err = errors.Join(err, gCtx.Err())
 	}
 

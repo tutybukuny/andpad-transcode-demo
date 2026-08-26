@@ -13,7 +13,7 @@ func (s *Service) CheckTranscodeRequest(ctx context.Context) error {
 	backToTodoCount := 0
 	moveToFailedCount := 0
 	for {
-		reqs, err := s.transReqRepo.GetStalledProcessingRequests(ctx, s.cfg.StalledRequestDuration, 1000)
+		reqs, err := s.transReqRepo.GetStalledProcessingRequests(ctx, s.cfg.StalledRequestDuration, s.cfg.StalledRequestBatch)
 		if err != nil {
 			return fmt.Errorf("GetStalledProcessingRequests: %w", err)
 		}
@@ -35,7 +35,7 @@ func (s *Service) CheckTranscodeRequest(ctx context.Context) error {
 				req.FailedReason = "exceed retry times threshold"
 			} else {
 				// increase retry times
-				moveToFailedCount++
+				backToTodoCount++
 				req.RetriedTimes++
 			}
 			err = s.transReqRepo.Update(ctx, &req)

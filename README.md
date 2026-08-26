@@ -86,6 +86,9 @@ The API is built with Fiber v3 and provides endpoints for managing transcoding j
 ### Core flows
 ![img.png](docs/img.png)
 
+### State Diagram
+![img_2.png](docs/img_2.png)
+
 ### Core Components
 
 - **API Server** - REST API built with Fiber for job management

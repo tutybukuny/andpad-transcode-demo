@@ -14,3 +14,5 @@ swagger:
 	swag init -g cmd/main.go --parseInternal --parseDependency
 jupiterlab:
 	python3 -m jupyter lab
+test:
+	go test ./... -count=1 -p=1
